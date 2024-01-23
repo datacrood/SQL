@@ -1,0 +1,135 @@
+--sub query and ctes
+select avg(sales),sum(sales)/count( order_id) from orders
+--aov 229.85
+
+
+
+select avg(order_sales) from 
+(select order_id,sum(sales) as order_sales
+from orders 
+group by order_id) A
+--aov 458.614665661807
+ -- i need order_ids whode order_value is greater than aov
+select order_id,sum(sales) as order_sales
+from orders 
+group by order_id
+having sum(sales) > (select avg(order_sales) from 
+(select order_id,sum(sales) as order_sales
+from orders 
+group by order_id) A ) ;
+
+select e.emp_name,e.dept_id,d.dep_id
+from employee e
+left join dept d on e.dept_id=d.dep_id
+where d.dep_id is null
+
+select * from employee 
+where (dept_id+salary) not in (select dep_id+salary from dept);
+
+select * from employee;
+select * from dept;
+
+
+select e.* , d.dep_avg_sal
+from employee e
+inner join (select dept_id,avg(salary) as dep_avg_sal
+from employee 
+group by dept_id) d on e.dept_id=d.dept_id
+where e.salary>d.dep_avg_sal
+
+select *,(select avg(salary) from employee) as avg_emp_salary
+from employee
+where dept_id=100
+;
+--CTEs -> common table expression 
+select avg(order_sales) from 
+(select order_id,sum(sales) as order_sales
+from orders 
+group by order_id) A
+
+with tov as (
+select order_id,sum(sales) as order_sales
+from orders 
+group by order_id
+),
+mov as (
+select max(order_sales) as order_sales
+from tov 
+)
+select order_sales from mov;
+
+select order_id,sum(sales) as order_sales
+from orders 
+group by order_id
+having sum(sales) > (select avg(order_sales) from 
+(select order_id,sum(sales) as order_sales
+from orders 
+group by order_id) A ) ;
+
+with tov as 
+(
+select order_id,sum(sales) as order_sales
+from orders 
+group by order_id
+),
+aov_cte as 
+(select avg(order_sales) as aov from tov)
+
+select tov.* 
+from tov
+where order_sales > (select aov from aov_cte)
+
+
+
+select order_id,sum(sales) as order_sales into #tov
+from orders 
+group by order_id;
+
+select * from #tov
+select avg(order_sales) as aov into #aov_cte
+from #tov;
+
+select * from #tov
+where order_sales > (select aov from #aov_cte);
+
+-------------------views---
+create view v_orders as 
+(
+select order_id,sum(sales) as order_sales
+from orders 
+group by order_id
+having sum(sales) > (select avg(order_sales) from 
+(select order_id,sum(sales) as order_sales
+from orders 
+group by order_id) A )
+)
+
+select * from v_orders
+
+create view orders_furniture as 
+(
+select order_id,sales from orders where category='Furniture'
+)
+
+select * from orders_furniture;
+
+create materialized view v_orders as 
+(
+select order_id,sum(sales) as order_sales
+from orders 
+group by order_id
+having sum(sales) > (select avg(order_sales) from 
+(select order_id,sum(sales) as order_sales
+from orders 
+group by order_id) A )
+)
+
+sunday 11 am
+--correlated
+--recursive ctes
+
+
+
+
+
+
